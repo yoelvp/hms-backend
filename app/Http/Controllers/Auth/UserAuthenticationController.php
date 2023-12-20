@@ -8,24 +8,24 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginUserRequest;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
-use App\Services\Auth\UserAuthenticationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Illuminate\Support\Facades\Hash;
 
 class UserAuthenticationController extends Controller {
-  public function __construct(
-    private UserAuthenticationService $userService
-  ) {
-  }
-
+  /**
+   * Login of the user who administers the system
+   *
+   * @param LoginUserRequest $request Request validation of data
+   * @return JsonResponse
+   */
   public function login(LoginUserRequest $request): JsonResponse {
-    $user = $this->userService->login($request->validated());
+    $request->validated();
+    $user = User::query()->where('email', $request['email'])->firstOrFail();
     $token = $user->createToken('authentication')->plainTextToken;
 
-    if (!Auth::attempt($user->only('email', 'password'))) {
+    if (!$user || !Hash::check($request['password'], $user['password'])) {
       return response()->json([
         'message' => 'The credentials are incorrect. Please try again.',
       ], 401);
@@ -34,12 +34,19 @@ class UserAuthenticationController extends Controller {
     return response()->json([
       'token' => $token,
       'token_type' => 'Bearer'
-    ], Response::HTTP_OK);
+    ], 200);
   }
 
+  /**
+   * Register of a new user
+   *
+   * @param RegisterUserRequest $request Request recivied
+   * @return JsonResponse Returns a JSON structure
+   */
   public function register(RegisterUserRequest $request): JsonResponse {
-    $user = $this->userService->register($request->validated());
+    $user = User::query()->create($request->validated());
     $token = $user->createToken('authentication')->plainTextToken;
+    Auth::login($user);
 
     return response()->json(
       [
@@ -47,20 +54,23 @@ class UserAuthenticationController extends Controller {
         'token' => $token,
         'token_type' => 'Bearer'
       ],
-      Response::HTTP_CREATED
+      201
     );
   }
 
+  /**
+   * Reset password of the user
+   */
   public function resetPassword(Request $request, int $id): JsonResponse {
     $request->validate([
       'password' => 'required|string|min:6'
     ]);
+    $userFound = User::query()->where('id', $id)->first();
 
-    $userFound = User::query()->where('id', $id)->firstOrFail();
     if (!$userFound) {
       return response()->json([
         'message' => "User with ID $id not found"
-      ], Response::HTTP_NOT_FOUND);
+      ], 404);
     }
 
     $userFound->update([
@@ -69,8 +79,19 @@ class UserAuthenticationController extends Controller {
 
 
     return response()->json([
-      'user' => $userFound,
+      'first' => $userFound,
       'message' => 'Password was updated successfully'
+    ]);
+  }
+
+  /**
+   * Sign off
+   */
+  public function logout(Request $request): JsonResponse {
+    $request->user()->tokens()->delete();
+
+    return response()->json([
+      'message' => 'The user logged out succesfully'
     ]);
   }
 }
