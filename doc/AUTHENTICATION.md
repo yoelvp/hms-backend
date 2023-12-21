@@ -150,3 +150,30 @@ Example
   "message": "User with ID {USER_ID} not found"
 }
 ```
+
+
+## Logout
+
+Log out of the current session using the `logout` service.
+
+- Path
+
+```
+/api/v1/auth/logout
+```
+
+- Headers
+
+```http
+Accept: application/json
+Content-Type: application/json  // Optional
+Authentication: Bearer [TOKEN]
+```
+
+- Response
+
+```json
+{
+  "message": "The user logged out succesfully"
+}
+```
