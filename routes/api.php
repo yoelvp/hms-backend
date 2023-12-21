@@ -24,4 +24,5 @@ Route::prefix('/auth')->group(function () {
 
 Route::prefix('/rooms')->group(function () {
   Route::get('/', [RoomsController::class, 'getAll']);
+  Route::post('/', [RoomsController::class, 'register']);
 })->middleware('auth:sanctum');
