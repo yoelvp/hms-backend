@@ -19,6 +19,7 @@ Route::prefix('/auth')->group(function () {
   Route::post('/login', [UserAuthenticationController::class, 'login']);
   Route::post('/register', [UserAuthenticationController::class, 'register']);
   Route::post('/reset-password/{id}', [UserAuthenticationController::class, 'resetPassword'])->middleware('auth:sanctum');
+  Route::post('/logout', [UserAuthenticationController::class, 'logout'])->middleware('auth:sanctum');
 });
 
 Route::prefix('/rooms')->group(function () {
