@@ -14,13 +14,13 @@ return new class extends Migration {
       $table->string('room_number');
       $table->string('loor_number');
       $table->string('number_beds');
-      $table->string('bathroom_included');
-      $table->string('hot_water');
-      $table->string('tv_included');
-      $table->string('availability');
+      $table->boolean('bathroom_included');
+      $table->boolean('hot_water');
+      $table->boolean('tv_included');
+      $table->boolean('availability');
       $table->string('type_room');
-      $table->string('price_per_day');
-      $table->string('price_per_hour');
+      $table->double('price_per_day', 8, 2);
+      $table->double('price_per_hour', 8, 2);
       $table->timestamps();
     });
   }
