@@ -10,6 +10,17 @@ class Room extends Model {
   use HasFactory;
 
   /**
+   * The attributes that are mass assignable.
+   *
+   * @var array<int, string>
+   */
+  protected $guarded = [
+    'id',
+    'created_at',
+    'updated_at'
+  ];
+
+  /**
    * Get all reservations for the room
    */
   public function bookings(): HasMany {

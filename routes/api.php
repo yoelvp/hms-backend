@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\UserAuthenticationController;
+use App\Http\Controllers\RoomsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('/auth')->group(function () {
+  Route::post('/login', [UserAuthenticationController::class, 'login']);
+  Route::post('/register', [UserAuthenticationController::class, 'register']);
+  Route::post('/reset-password/{id}', [UserAuthenticationController::class, 'resetPassword'])->middleware('auth:sanctum');
+  Route::post('/logout', [UserAuthenticationController::class, 'logout'])->middleware('auth:sanctum');
 });
+
+Route::prefix('/rooms')->group(function () {
+  Route::get('/', [RoomsController::class, 'getAll']);
+  Route::post('/', [RoomsController::class, 'register']);
+  Route::post('/many', [RoomsController::class, 'registerMany']);
+})->middleware('auth:sanctum');
